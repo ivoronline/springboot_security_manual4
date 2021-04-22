@@ -1,16 +1,15 @@
 package com.ivoronline.springboot_security_manual4.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
-import java.util.Set;
-
+@Slf4j
 @Component
 public class MyAuthenticationManager implements AuthenticationManager {
 
@@ -20,22 +19,25 @@ public class MyAuthenticationManager implements AuthenticationManager {
   public Authentication authenticate(Authentication enteredAuthentication) {
 
     //GET ENTERED CREDENTIALS
-    String enteredUsername = (String) enteredAuthentication.getPrincipal();   //ENTERED USERNAME
-    String enteredPassword = (String) enteredAuthentication.getCredentials(); //ENTERED PASSWORD
+    String enteredUsername = (String) enteredAuthentication.getPrincipal();   //USERNAME
+    String enteredPassword = (String) enteredAuthentication.getCredentials(); //PASSWORD
 
     //GET USER DETAILS
-    UserDetails           userDetails    = userDetailsService.loadUserByUsername(enteredUsername);
-    String                storedPassword = userDetails.getPassword();
-    Set<GrantedAuthority> authorities    = (Set<GrantedAuthority>) userDetails.getAuthorities();
+    UserDetails userDetails = userDetailsService.loadUserByUsername(enteredUsername);
 
-    //AUTHENTICATE USER (Compare Entered and Stored Password)
-    if (!enteredPassword.equals(storedPassword)) { System.out.println("Incorrect Password"); return null; }
+    //CHECK USER DETAILS
+    if ( userDetails == null                              ) { log.error("Username not found"); return null; }
+    if (!enteredPassword.equals(userDetails.getPassword())) { log.error("Incorrect Password"); return null; }
 
-    //CREATE VALIDATED AUTHENTICATION
-    Authentication auth = new UsernamePasswordAuthenticationToken(enteredUsername, null, authorities);
+    //CREATE VALIDATED AUTHENTICATION OBJECT
+    Authentication authentication = new UsernamePasswordAuthenticationToken(
+      enteredUsername,
+      enteredPassword ,
+      userDetails.getAuthorities()
+    );
 
-    //RETURN VALIDATED AUTHENTICATION
-    return auth;
+    //RETURN AUTHENTICATION OBJECT
+    return authentication;
 
   }
 
