@@ -1,4 +1,4 @@
-package com.ivoronline.springboot_security_manual4.security;
+package com.ivoronline.springboot_security_manual4.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
